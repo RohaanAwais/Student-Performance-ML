@@ -1,0 +1,530 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Prediction System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #17233c;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(120deg, #142b55, #315da8);
+            color: white;
+            text-align: center;
+            padding: 38px 18px;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        header p {
+            max-width: 760px;
+            margin: auto;
+            color: #e0e9ff;
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 28px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(20, 43, 85, 0.07);
+        }
+
+        h2 {
+            color: #234c91;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #315da8;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .metric {
+            background: #f1f5fc;
+            padding: 14px;
+            border-radius: 9px;
+        }
+
+        .metric span {
+            display: block;
+            color: #536581;
+            font-size: 13px;
+        }
+
+        .metric strong {
+            font-size: 23px;
+            color: #234c91;
+            overflow-wrap: anywhere;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e4;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #7598d5;
+        }
+
+        button {
+            background: #244f94;
+            color: white;
+            padding: 12px 20px;
+            margin-top: 20px;
+            border: 0;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #17386f;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .result {
+            margin-top: 18px;
+            padding: 16px;
+            background: #edf4ff;
+            border-left: 4px solid #315da8;
+            border-radius: 7px;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            background: #fff0f0;
+            border-left-color: #b42318;
+        }
+
+        .muted {
+            color: #59677c;
+            font-size: 13px;
+        }
+
+        footer {
+            text-align: center;
+            color: #63718a;
+            padding: 25px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Student Performance Prediction System</h1>
+    <p>
+        A machine learning project exploring student sleep,
+        screen time, lifestyle and academic performance.
+    </p>
+</header>
+
+<main>
+
+    <section class="card">
+        <h2>About the Project</h2>
+        <p>
+            This project uses student data to train two supervised
+            machine learning models. Linear Regression estimates
+            numerical CGPA, while Logistic Regression predicts a
+            CGPA category.
+        </p>
+        <p>
+            The models are built with scikit-learn, saved using joblib,
+            and accessed through a FastAPI backend.
+        </p>
+        <p class="muted">
+            Predictions are estimates and do not prove that lifestyle
+            factors cause particular academic outcomes.
+        </p>
+    </section>
+
+    <section class="card">
+        <h2>Model Evaluation</h2>
+
+        <h3>Linear Regression</h3>
+        <div class="metric-grid">
+            <div class="metric">
+                <span>R-squared (R²)</span>
+                <strong id="r2">Loading...</strong>
+            </div>
+            <div class="metric">
+                <span>Mean Absolute Error</span>
+                <strong id="mae">Loading...</strong>
+            </div>
+            <div class="metric">
+                <span>Root Mean Squared Error</span>
+                <strong id="rmse">Loading...</strong>
+            </div>
+        </div>
+
+        <h3>Logistic Regression</h3>
+        <div class="metric-grid">
+            <div class="metric">
+                <span>Accuracy</span>
+                <strong id="accuracy">Loading...</strong>
+            </div>
+            <div class="metric">
+                <span>Precision</span>
+                <strong id="precision">Loading...</strong>
+            </div>
+            <div class="metric">
+                <span>Recall</span>
+                <strong id="recall">Loading...</strong>
+            </div>
+            <div class="metric">
+                <span>F1-score</span>
+                <strong id="f1">Loading...</strong>
+            </div>
+        </div>
+
+        <p id="metrics-status" class="muted"></p>
+    </section>
+
+    <section class="card">
+        <h2>Model 1: CGPA Regression</h2>
+        <p>
+            Enter student information to predict a numerical CGPA
+            using the Linear Regression model.
+        </p>
+
+        <form id="regression-form">
+            <div class="form-grid">
+
+                <div>
+                    <label for="r-age">Age (years)</label>
+                    <input id="r-age" name="age" type="number"
+                           min="17" max="27" step="1"
+                           value="20" required>
+                </div>
+
+                <div>
+                    <label for="r-sleep">Weekday sleep (hours)</label>
+                    <input id="r-sleep" name="avg_sleep_hours_weekday"
+                           type="number" min="1.5" max="10.5" step="0.1"
+                           value="7" required>
+                </div>
+
+                <div>
+                    <label for="r-screen">Daily screen time (hours)</label>
+                    <input id="r-screen" name="daily_screen_time_hours"
+                           type="number" min="0.5" max="19.5" step="0.1"
+                           value="5" required>
+                </div>
+
+                <div>
+                    <label for="r-presleep">Pre-sleep screen time (minutes)</label>
+                    <input id="r-presleep" name="pre_sleep_screen_time_min"
+                           type="number" min="0" max="240" step="1"
+                           value="30" required>
+                </div>
+
+                <div>
+                    <label for="r-caffeine">Caffeinated drinks per day</label>
+                    <input id="r-caffeine" name="caffeine_drinks_per_day"
+                           type="number" min="0" max="7" step="1"
+                           value="1" required>
+                </div>
+
+                <div>
+                    <label for="r-quality">Sleep quality (1–10)</label>
+                    <input id="r-quality" name="sleep_quality_score"
+                           type="number" min="1" max="10" step="0.1"
+                           value="7" required>
+                </div>
+
+                <div>
+                    <label for="r-exercise">Exercise days per week</label>
+                    <input id="r-exercise" name="exercise_days_per_week"
+                           type="number" min="0" max="7" step="1"
+                           value="3" required>
+                </div>
+
+                <div>
+                    <label for="r-study">Weekly study hours</label>
+                    <input id="r-study" name="weekly_study_hours"
+                           type="number" min="0" max="88.5" step="0.1"
+                           value="15" required>
+                </div>
+
+                <div>
+                    <label for="r-attendance">Attendance (%)</label>
+                    <input id="r-attendance" name="class_attendance_percent"
+                           type="number" min="36.9" max="100" step="0.1"
+                           value="80" required>
+                </div>
+
+            </div>
+
+            <button type="submit">Predict CGPA</button>
+        </form>
+
+        <div id="regression-result" class="result" hidden
+             aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+        <h2>Model 2: CGPA Classification</h2>
+        <p>
+            Enter student information to classify CGPA as below 3.0
+            or 3.0 and above using the Logistic Regression model.
+        </p>
+
+        <form id="classification-form">
+            <div class="form-grid">
+
+                <div>
+                    <label for="c-age">Age (years)</label>
+                    <input id="c-age" name="age" type="number"
+                           min="17" max="27" step="1"
+                           value="20" required>
+                </div>
+
+                <div>
+                    <label for="c-sleep">Weekday sleep (hours)</label>
+                    <input id="c-sleep" name="avg_sleep_hours_weekday"
+                           type="number" min="1.5" max="10.5" step="0.1"
+                           value="7" required>
+                </div>
+
+                <div>
+                    <label for="c-screen">Daily screen time (hours)</label>
+                    <input id="c-screen" name="daily_screen_time_hours"
+                           type="number" min="0.5" max="19.5" step="0.1"
+                           value="5" required>
+                </div>
+
+                <div>
+                    <label for="c-presleep">Pre-sleep screen time (minutes)</label>
+                    <input id="c-presleep" name="pre_sleep_screen_time_min"
+                           type="number" min="0" max="240" step="1"
+                           value="30" required>
+                </div>
+
+                <div>
+                    <label for="c-caffeine">Caffeinated drinks per day</label>
+                    <input id="c-caffeine" name="caffeine_drinks_per_day"
+                           type="number" min="0" max="7" step="1"
+                           value="1" required>
+                </div>
+
+                <div>
+                    <label for="c-quality">Sleep quality (1–10)</label>
+                    <input id="c-quality" name="sleep_quality_score"
+                           type="number" min="1" max="10" step="0.1"
+                           value="7" required>
+                </div>
+
+                <div>
+                    <label for="c-exercise">Exercise days per week</label>
+                    <input id="c-exercise" name="exercise_days_per_week"
+                           type="number" min="0" max="7" step="1"
+                           value="3" required>
+                </div>
+
+                <div>
+                    <label for="c-study">Weekly study hours</label>
+                    <input id="c-study" name="weekly_study_hours"
+                           type="number" min="0" max="88.5" step="0.1"
+                           value="15" required>
+                </div>
+
+                <div>
+                    <label for="c-attendance">Attendance (%)</label>
+                    <input id="c-attendance" name="class_attendance_percent"
+                           type="number" min="36.9" max="100" step="0.1"
+                           value="80" required>
+                </div>
+
+            </div>
+
+            <button type="submit">Classify CGPA</button>
+        </form>
+
+        <div id="classification-result" class="result" hidden
+             aria-live="polite"></div>
+    </section>
+
+</main>
+
+<footer>
+    Machine Learning Lab Assignment | Student Performance Prediction System
+</footer>
+
+<script>
+    // Load actual model evaluation metrics from the FastAPI backend.
+    async function loadMetrics() {
+        const status = document.getElementById("metrics-status");
+
+        try {
+            const response = await fetch("/metrics");
+
+            if (!response.ok) {
+                throw new Error("Could not load metrics.");
+            }
+
+            const data = await response.json();
+
+            document.getElementById("r2").textContent =
+                Number(data.regression.r2).toFixed(3);
+
+            document.getElementById("mae").textContent =
+                Number(data.regression.mae).toFixed(3);
+
+            document.getElementById("rmse").textContent =
+                Number(data.regression.rmse).toFixed(3);
+
+            document.getElementById("accuracy").textContent =
+                (Number(data.classification.accuracy) * 100).toFixed(1) + "%";
+
+            document.getElementById("precision").textContent =
+                Number(data.classification.precision).toFixed(3);
+
+            document.getElementById("recall").textContent =
+                Number(data.classification.recall).toFixed(3);
+
+            document.getElementById("f1").textContent =
+                Number(data.classification.f1_score).toFixed(3);
+
+            status.textContent = "Metrics loaded from the trained models.";
+        } catch (error) {
+            status.textContent =
+                "Unable to load metrics. Check that the backend is running.";
+        }
+    }
+
+    // Send one form to its matching prediction endpoint.
+    async function submitPrediction(form, endpoint, resultId, type) {
+        const resultBox = document.getElementById(resultId);
+        const button = form.querySelector("button");
+
+        resultBox.hidden = false;
+        resultBox.className = "result";
+        resultBox.textContent = "Calculating prediction...";
+        button.disabled = true;
+
+        try {
+            const formData = new FormData(form);
+            const payload = {};
+
+            for (const [key, value] of formData.entries()) {
+                payload[key] = Number(value);
+            }
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const detail = Array.isArray(data.detail)
+                    ? data.detail.map(item => item.msg).join("; ")
+                    : data.detail;
+
+                throw new Error(detail || "Prediction request failed.");
+            }
+
+            if (type === "regression") {
+                resultBox.textContent =
+                    "Predicted CGPA: " + data.predicted_cgpa;
+            } else {
+                resultBox.textContent =
+                    "Predicted category: " + data.predicted_category +
+                    " | Probability of CGPA >= 3.0: " +
+                    (data.high_cgpa_probability * 100).toFixed(1) + "%";
+            }
+        } catch (error) {
+            resultBox.className = "result error";
+            resultBox.textContent = "Error: " + error.message;
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    document.getElementById("regression-form").addEventListener(
+        "submit",
+        function(event) {
+            event.preventDefault();
+
+            submitPrediction(
+                this,
+                "/predict/regression",
+                "regression-result",
+                "regression"
+            );
+        }
+    );
+
+    document.getElementById("classification-form").addEventListener(
+        "submit",
+        function(event) {
+            event.preventDefault();
+
+            submitPrediction(
+                this,
+                "/predict/classification",
+                "classification-result",
+                "classification"
+            );
+        }
+    );
+
+    loadMetrics();
+</script>
+
+</body>
+</html>
+
+

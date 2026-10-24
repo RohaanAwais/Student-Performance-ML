@@ -1,0 +1,30 @@
+{
+    "dataset": "Student Sleep, Screen Time & Academic Performance",
+    "records_in_dataset": 500,
+    "records_with_known_cgpa": 493,
+    "regression": {
+        "algorithm": "Linear Regression",
+        "r2": 0.34523945679809787,
+        "mae": 0.20893793328953106,
+        "rmse": 0.25877271509151856
+    },
+    "classification": {
+        "algorithm": "Logistic Regression",
+        "accuracy": 0.7474747474747475,
+        "precision": 0.6470588235294118,
+        "recall": 0.36666666666666664,
+        "f1_score": 0.46808510638297873
+    },
+    "classification_threshold": 3.0,
+    "features": [
+        "age",
+        "avg_sleep_hours_weekday",
+        "daily_screen_time_hours",
+        "pre_sleep_screen_time_min",
+        "caffeine_drinks_per_day",
+        "sleep_quality_score",
+        "exercise_days_per_week",
+        "weekly_study_hours",
+        "class_attendance_percent"
+    ]
+}
